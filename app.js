@@ -1,43 +1,40 @@
-var createError = require('http-errors');
-var express = require('express');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var methodOverride = require('method-override');
-var cors = require('cors');
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const createError = require('http-errors');
+const logger = require('morgan');
+const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
 
-var apiTestRouter = require('./app/api-test/router');
-var confirmationRouter = require('./app/confirmation/router');
-var greetingsRouter = require('./app/greetings/router');
-
-var app = express();
-var URL = '/api/v1';
+// Middleware
 app.use(cors());
-
 app.use(methodOverride('_method'));
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// api
+// Routes
+const apiTestRouter = require('../app/api-test/router');
+const confirmationRouter = require('../app/confirmation/router');
+const greetingsRouter = require('../app/greetings/router');
+const URL = '/api/v1';
+
 app.use(`${URL}`, apiTestRouter);
 app.use(`${URL}/confirmation`, confirmationRouter);
 app.use(`${URL}/greetings`, greetingsRouter);
 
-// catch 404 and forward to error handler
-app.use(function (_, _, next) {
+// 404 handler
+app.use(function (_, __, next) {
   next(createError(404));
 });
 
-// error handler
+// Error handler
 app.use(function (err, req, res, _) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({ message: err.message });
 });
 
-module.exports = app;
+// Export as serverless function for Vercel
+const serverless = require('serverless-http');
+module.exports = serverless(app);
