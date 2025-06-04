@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server",
+    "build": "npm run build",
     "dev": "env-cmd -f ./.env nodemon ./bin/www",
     "prod": "env-cmd -f ./.env nodemon ./bin/www"
   },
